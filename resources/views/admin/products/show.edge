@@ -6,20 +6,59 @@
   <ul class="breadcrumbs pull-left">
     <li><a href="/Admin">Dashboard</a></li>
     <li><a href="/admin/products">All Products</a></li>
-    <li><span>Show</span></li>
+    <li><span>{{product.title}}</span></li>
   </ul>
 </div>
 @endsection
 
 @section('content')
-<div class="row">
-  <div class="col-12 mt-5">
+<div id="products-show-page"class="row">
+  <div class="col-md-9 mt-5">
     <div class="card">
       <div class="card-body">
-      
+        <div class="row">
+          <div class="col-md-4">
+            <img style="width: 100%;"src="{{product.img_url}}"
+            class = "show-products-img">
+          </div>
+          <div class="col-md-8">
+            <h2>{{product.title}}</h2>
+            <p>
+              <span>Description:</span>
+            {{product.description}}
+            </p>
+            <div class=" details row">
+              <div class="col-md-3">
+                <h5>SKU</h5>
+                <span>{{product.sku}}</span>
+              </div>
+              <div class="col-md-3">
+                <h5>Material</h5>
+                <span>{{product.material}}</span>
+              </div>
+              <div class="col-md-3">
+                <h5>Brand</h5>
+                <span>{{product.brand}}</span>
+              </div>
+
+              <div class="col-md-3">
+                <h5>Created_by</h5>
+                <span>{{product.user}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+       </div>
+      </div>
+    </div>
+  <div class="col-md-3 mt-5">
+    <div class="card">
+      <div class="card-body">
+        <a href="/admin/products/{{product.id}}/edit" class="btn btn-primary btn-lg btn-block">Edit  <i class="ti-pencil-alt"></i>  </a>
+         <a href="/products/{{product.id}}/delete" class="btn btn-danger btn-lg btn-block" onClick="return confirm('are you sure?')">Delete  <i class="ti-trash"></i>  </a>
       </div>
     </div>
   </div>
-
 </div>
+
 @endsection
