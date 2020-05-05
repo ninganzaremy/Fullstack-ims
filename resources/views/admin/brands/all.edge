@@ -2,10 +2,10 @@
 
 @section('breadcrumbs')
 <div class="breadcrumbs-area clearfix">
-    <h4 class="page-title pull-left">Products</h4>
+    <h4 class="page-title pull-left">Brands</h4>
     <ul class="breadcrumbs pull-left">
         <li><a href="/">Dashboard</a></li>
-        <li><span>All Produtcts</span></li>
+        <li><span>All Brands</span></li>
     </ul>
 </div>
 @endsection
@@ -23,47 +23,35 @@
             <thead class="text-uppercase">
               <tr>
                 <th scope="col">ID</th>
-                <th scope="col">Title</th>
-                <th scope="col">SKU</th>
-                <th scope="col">Material</th>
-                <th scope="col">Quantity</th>
-                <th scope="col">Size</th>
-                <th scope="col">Brand</th>
+                <th scope="col">Company</th>
                 <th scope="col">Created_By</th>
-                <th scope="col">Status</th>
+
                 <th scope="col">Options</th>
               </tr>
             </thead>
             <tbody>
-              @each(product in allProducts)
+              @each(brand in allBrands)
               <tr>
-                <th scope="row">{{product.id}}</th>
+                <th scope="row">{{brand.id}}</th>
                 <td>
-                   <a href="/admin/products/{{product.id}}">
-                  {{product.title}}
+                   <a href="/admin/brands/{{brand.id}}">
+                    <img src="{{brand.img_url}}" alt="" style="width:100%; max-width:250px;">    
                    </a>
                 </td>
-                <td>{{product.sku}}</td>
-                <td>{{product.material}}</td>
-                <td>{{product.qty}}</td>
-                <td>{{product.size}}</td>
 
                 <td>
-                   {{product.brand}}
+                   {{brand.user}}
                 </td>
-                <td>
-                   {{product.user}}
-                </td>
-                <td><span class="status-p bg-primary">pending</span></td>
+
                 <td>
                   <ul class="d-flex justify-content-center">
                     <li class="mr-3">
-                      <a href="/admin/products/{{product.id}}/edit" class="text-secondary">
+                      <a href="/admin/brands/{{brand.id}}/edit" class="text-secondary">
                         <i class="fa fa-edit"></i>
                       </a>
                     </li>
                     <li>
-                      <a href="/admin/products/{{product.id}}/delete" class="text-danger" onClick="return confirm('are you sure?')">
+                      <a href="/admin/brands/{{brand.id}}/delete" class="text-danger" onClick="return confirm('are you sure?')">
                         <i class="ti-trash"></i>
                       </a>
                     </li>

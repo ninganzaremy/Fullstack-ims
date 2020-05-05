@@ -2,30 +2,26 @@
 const Database = use('Database')
 const sanitize = use('sqlstring')
 
-class ProductController {
+class BrandController {
+
+
   async index({view,request,response}){
     try {
-      let allProducts= await Database.raw(`
-        SELECT products.id,
-products.title, products.sku,brands.title as brand,
-concat(users.f_name, ' ' ,users.l_name) as user,
- products.material,products.qty, products.size, products.user_id,products.created_at
-FROM products
-INNER JOIN  brands
-ON products.brand_id = brands.id
+      let allBrands= await Database.raw(`
+        SELECT brands.id, brands.title, brands.img_url, brands.user_id,
+        concat(users.f_name, ' ', users.l_name) as user,
+        brands.created_at, brands.updated_at From brands
 INNER JOIN  users
-ON products.user_id = users.id
+ON brands.user_id = users.id
 ORDER BY created_at ASC
         `)
 
-        allProducts = allProducts[0]
+        allBrands = allBrands[0]
 
-        return view.render('admin/products/all',{allProducts})
+        return view.render('admin/brands/all',{allBrands})
     } catch (error) {
       console.log(error)
-       return response.redirect('back') //`<h1 style="color: red">THERE WAS AN ERROR</h1><h3>${error.sqlMessage}</h3>`
-
-
+       return response.redirect('back')
     }
 
   }
@@ -154,4 +150,4 @@ LIMIT 1
   }
 }
 
-module.exports = ProductController
+module.exports = BrandController
