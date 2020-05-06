@@ -62,20 +62,18 @@
             </div>
 
 
-            <div class="col-sm-12 col-md-6">
+            <div class="col-sm-12 col-md-4">
               <label class="col-form-label">Brands</label>
               <select class="custom-select" name="brand_id">
-                <option value ="0" selected ="selected">Nike</option>
-                <option value ="1">Adidas</option>
-                <option value ="2">Puma</option>
-                <option value ="3">Converse</option>
-
                 @each(brand in brands)
-                <option value="{{brand.id}}" {{(brand.id == product.brand_id) ? 'selected="selected"' : ''}}
-                 >{{brand.title}}</option>
+                <option value="{{brand.id}}" {{(brand.id == product.brand_id) ? 'selected="selected"' : ''}}>
+                  {{brand.title}}
+                </option>
                 @endeach
               </select>
             </div>
+
+
           </div>
           <div class="form-group">
             <label for="example-text-input" class="col-form-label">Description</label>
@@ -85,6 +83,7 @@
             <button type="submit" class="btn btn-primary mb-3">Submit</button>
           </div>
         </form>
+
       </div>
     </div>
   </div>

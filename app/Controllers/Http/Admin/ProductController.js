@@ -23,9 +23,7 @@ ORDER BY created_at ASC
         return view.render('admin/products/all',{allProducts})
     } catch (error) {
       console.log(error)
-       return response.redirect('back') //`<h1 style="color: red">THERE WAS AN ERROR</h1><h3>${error.sqlMessage}</h3>`
-
-
+       return response.redirect('back')
     }
 
   }
@@ -40,7 +38,7 @@ ORDER BY created_at ASC
            ${sanitize.escape(post.img_url)},
            ${sanitize.escape(post.material)},
            ${sanitize.escape(post.description)},
-           ${parseInt(1)},
+           ${sanitize.escape(post.brand_id)},
            ${sanitize.escape(post.qty)},
            ${sanitize.escape(post.size)},
            ${parseInt(1)})
@@ -48,13 +46,17 @@ ORDER BY created_at ASC
          return response.redirect('/admin/products')
      } catch (error) {
        console.log(error)
-        return response.redirect('back') //`<h1 style="color: red">THERE WAS AN ERROR</h1><h3>${error.sqlMessage}</h3>`
-
-
+        return response.redirect('back')
      }
   }
-  create({view,request, response}){
-    return view.render('admin/products/create')
+async create({view,request, response}){
+    let brands= await Database.raw(`
+      SELECT * FROM brands
+      ORDER BY brands.title ASC
+      `)
+
+    brands = brands[0]
+    return view.render('admin/products/create',{brands})
   }
   async show({view,request, response, params}){
 
@@ -75,21 +77,21 @@ LIMIT 1
         `)
         product = product[0][0]
 
+
+
         return view.render('admin/products/show',{product})
     } catch (error) {
       console.log(error)
-       return response.redirect('back') //`<h1 style="color: red">THERE WAS AN ERROR</h1><h3>${error.sqlMessage}</h3>`
-
+       return response.redirect('back')
 
     }
   }
   async edit({view,request, response, params}){
     try {
       let product= await Database.raw(`
-        SELECT products.id,
-products.title, products.sku,products.img_url,products.description,brands.title as brand,
+        SELECT products.id,products.title, products.sku,products.img_url,products.description,brands.title as brand,
 concat(users.f_name, ' ' ,users.l_name) as user,
- products.material,products.qty, products.size, products.user_id,products.created_at
+ products.material,products.qty, products.size, products.user_id,products.brand_id,products.created_at
 FROM products
 INNER JOIN  brands
 ON products.brand_id = brands.id
@@ -100,12 +102,17 @@ ORDER BY created_at ASC
 LIMIT 1
         `)
         product = product[0][0]
+        let brands= await Database.raw(`
+          SELECT * FROM brands
+          ORDER BY brands.title ASC
+          `)
 
-        return view.render('admin/products/edit',{product})
+        brands = brands[0]
+
+        return view.render('admin/products/edit',{product,brands})
     } catch (error) {
       console.log(error)
-       return response.redirect('back') //`<h1 style="color: red">THERE WAS AN ERROR</h1><h3>${error.sqlMessage}</h3>`
-
+       return response.redirect('back')
 
     }
   }
@@ -121,7 +128,7 @@ LIMIT 1
         img_url = ${sanitize.escape(post.img_url)},
         material =  ${sanitize.escape(post.material)},
         description =${sanitize.escape(post.description)},
-        brand_id = ${parseInt(1)},
+        brand_id = ${sanitize.escape(post.brand_id)},
         qty = ${sanitize.escape(post.qty)},
         size =${sanitize.escape(post.size)},
         user_id = ${parseInt(1)}

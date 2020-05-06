@@ -1,4 +1,4 @@
-#products-show-page .details{
-  margin: 25px 0;
+#products-show-page .details, #brands-show-page .details{
+  margin: 50px 0;
 
 }
