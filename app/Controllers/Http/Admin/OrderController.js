@@ -1,27 +1,28 @@
 'use strict'
-
+const Database = use('Database')
+const sanitize = use('sqlstring')
 class OrderController {
 
 
 
   async index({view,request,response}){
     try {
-      let allProducts= await Database.raw(`
-        SELECT products.id,
-products.title, products.sku,brands.title as brand,
-concat(users.f_name, ' ' ,users.l_name) as user,
- products.material,products.qty, products.size, products.user_id,products.created_at
-FROM products
-INNER JOIN  brands
-ON products.brand_id = brands.id
-INNER JOIN  users
-ON products.user_id = users.id
-ORDER BY created_at ASC
-        `)
+//       let allProducts= await Database.raw(`
+//         SELECT orders.id,
+// orders.title, orders.sku,brands.title as brand,
+// concat(users.f_name, ' ' ,users.l_name) as user,
+//  orders.material,orders.qty, orders.size, orders.user_id,orders.created_at
+// FROM orders
+// INNER JOIN  brands
+// ON orders.brand_id = brands.id
+// INNER JOIN  users
+// ON orders.user_id = users.id
+// ORDER BY created_at ASC
+//         `)
 
-        allProducts = allProducts[0]
+        let allProducts = ''
 
-        return view.render('admin/products/all',{allProducts})
+        return view.render('admin/orders/all',{allProducts})
     } catch (error) {
       console.log(error)
        return response.redirect('back')
@@ -32,7 +33,7 @@ ORDER BY created_at ASC
      try {
        const post= request.post()
        await Database.raw(`
-         INSERT INTO products(title,sku,img_url,material,description,brand_id,qty, size, user_id)
+         INSERT INTO orders(title,sku,img_url,material,description,brand_id,qty, size, user_id)
          values(
            ${sanitize.escape(post.title)},
            ${sanitize.escape(post.sku)},
@@ -44,43 +45,43 @@ ORDER BY created_at ASC
            ${sanitize.escape(post.size)},
            ${parseInt(1)})
          `)
-         return response.redirect('/admin/products')
+         return response.redirect('/admin/orders')
      } catch (error) {
        console.log(error)
         return response.redirect('back')
      }
   }
 async create({view,request, response}){
-    let brands= await Database.raw(`
-      SELECT * FROM brands
-      ORDER BY brands.title ASC
-      `)
+    // let brands= await Database.raw(`
+    //   SELECT * FROM brands
+    //   ORDER BY brands.title ASC
+    //   `)
 
-    brands = brands[0]
-    return view.render('admin/products/create',{brands})
+  let  brands = ''
+    return view.render('admin/orders/create',{brands})
   }
   async show({view,request, response, params}){
 
     try {
-      let product= await Database.raw(`
-        SELECT products.id,
-products.title, products.sku,products.img_url,products.description,brands.title as brand,
+      let order= await Database.raw(`
+        SELECT orders.id,
+orders.title, orders.sku,orders.img_url,orders.description,brands.title as brand,
 concat(users.f_name, ' ' ,users.l_name) as user,
- products.material,products.qty, products.size, products.user_id,products.created_at
-FROM products
+ orders.material,orders.qty, orders.size, orders.user_id,orders.created_at
+FROM orders
 INNER JOIN  brands
-ON products.brand_id = brands.id
+ON orders.brand_id = brands.id
 INNER JOIN  users
-ON products.user_id = users.id
-WHERE products.id = ${params.id}
+ON orders.user_id = users.id
+WHERE orders.id = ${params.id}
 ORDER BY created_at ASC
 LIMIT 1
         `)
-        product = product[0][0]
+        order = order[0][0]
 
 
 
-        return view.render('admin/products/show',{product})
+        return view.render('admin/orders/show',{order})
     } catch (error) {
       console.log(error)
        return response.redirect('back')
@@ -89,20 +90,20 @@ LIMIT 1
   }
   async edit({view,request, response, params}){
     try {
-      let product= await Database.raw(`
-        SELECT products.id,products.title, products.sku,products.img_url,products.description,brands.title as brand,
+      let order= await Database.raw(`
+        SELECT orders.id,orders.title, orders.sku,orders.img_url,orders.description,brands.title as brand,
 concat(users.f_name, ' ' ,users.l_name) as user,
- products.material,products.qty, products.size, products.user_id,products.brand_id,products.created_at
-FROM products
+ orders.material,orders.qty, orders.size, orders.user_id,orders.brand_id,orders.created_at
+FROM orders
 INNER JOIN  brands
-ON products.brand_id = brands.id
+ON orders.brand_id = brands.id
 INNER JOIN  users
-ON products.user_id = users.id
-WHERE products.id = ${params.id}
+ON orders.user_id = users.id
+WHERE orders.id = ${params.id}
 ORDER BY created_at ASC
 LIMIT 1
         `)
-        product = product[0][0]
+        order = order[0][0]
         let brands= await Database.raw(`
           SELECT * FROM brands
           ORDER BY brands.title ASC
@@ -110,7 +111,7 @@ LIMIT 1
 
         brands = brands[0]
 
-        return view.render('admin/products/edit',{product,brands})
+        return view.render('admin/orders/edit',{order,brands})
     } catch (error) {
       console.log(error)
        return response.redirect('back')
@@ -122,7 +123,7 @@ LIMIT 1
       const id = params.id
       const post= request.post()
       await Database.raw(`
-        UPDATE products
+        UPDATE orders
         SET
         title =  ${sanitize.escape(post.title)},
         sku =  ${sanitize.escape(post.sku)},
@@ -135,7 +136,7 @@ LIMIT 1
         user_id = ${parseInt(1)}
         WHERE id =${id}
         `)
-        return response.redirect(`/admin/products/${id}`)
+        return response.redirect(`/admin/orders/${id}`)
     } catch (error) {
       console.log(error)
        return response.redirect('back') //`<h1 style="color: red">THERE WAS AN ERROR</h1><h3>${error.sqlMessage}</h3>`
@@ -148,10 +149,10 @@ LIMIT 1
     try {
       const id = params.id
       await Database.raw(`
-        DELETE FROM products
+        DELETE FROM orders
         WHERE id = ${id}
         `)
-        return response.redirect(`/admin/products`)
+        return response.redirect(`/admin/orders`)
     } catch (error) {
       console.log(error)
        return response.redirect('back') //`<h1 style="color: red">THERE WAS AN ERROR</h1><h3>${error.sqlMessage}</h3>`
