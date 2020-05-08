@@ -18,7 +18,8 @@ const Route = use('Route')
 
 Route.get('/', 'PageController.index')
 
-
+//API
+Route.get('api/admin/products', 'Api/ProductController.index')
 
 
 //ADMIN products

@@ -2,9 +2,6 @@
 const Database = use('Database')
 const sanitize = use('sqlstring')
 class OrderController {
-
-
-
   async index({view,request,response}){
     try {
 //       let allProducts= await Database.raw(`
