@@ -13,7 +13,7 @@ class CreateItemsSchema extends Schema {
         sku VARCHAR(60) NOT NULL,
         material VARCHAR(60) NOT NULL,
         description TEXT NOT NULL,
-        brand_id INT UNSIGNED,
+        brand_id INT UNSIGNED NOT NULL,
         qty INT UNSIGNED,
         size FLOAT UNSIGNED,
         order_id INT UNSIGNED NOT NULL,

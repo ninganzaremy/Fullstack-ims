@@ -20,6 +20,7 @@ Route.get('/', 'PageController.index')
 
 //API
 Route.get('api/admin/products', 'Api/ProductController.index')
+Route.post('api/admin/products', 'Api/ProductController.store')
 
 
 //ADMIN products

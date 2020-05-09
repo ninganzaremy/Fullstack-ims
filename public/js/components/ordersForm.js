@@ -71,6 +71,21 @@ var Popup = function (_Component) {
       }
     };
 
+    _this.clickedSaveItemBtn = function () {
+      var product = _this.props.allProducts.filter(function (product) {
+        return product.id == _this.state.form.product;
+      });
+      // console.log('===========================')
+      // console.log(test[0])
+      // console.log('===========================')
+      var itemData = {
+        productInfo: product[0],
+        qtyBuying: _this.state.form.qty
+      };
+      _this.props.addItemToList(itemData);
+      _this.props.closePopup();
+    };
+
     _this.clickedCancelBtn = function () {
       _this.props.closePopup();
     };
@@ -116,6 +131,11 @@ var Popup = function (_Component) {
                 _react2.default.createElement(
                   'select',
                   { className: 'custom-select', name: 'product', value: this.state.form.product, onChange: this.change },
+                  _react2.default.createElement(
+                    'option',
+                    { value: 'none' },
+                    'Select a Sneaker '
+                  ),
                   this.showProducts()
                 )
               ),
@@ -132,24 +152,69 @@ var Popup = function (_Component) {
                   { className: 'custom-select', name: 'qty', value: this.state.form.qty, onChange: this.change },
                   _react2.default.createElement(
                     'option',
-                    { value: '0' },
+                    { value: '1' },
                     '1'
                   ),
                   _react2.default.createElement(
                     'option',
+                    { value: '2' },
+                    '2'
+                  ),
+                  _react2.default.createElement(
+                    'option',
+                    { value: '3' },
+                    '3'
+                  ),
+                  _react2.default.createElement(
+                    'option',
                     { value: '4' },
+                    '4'
+                  ),
+                  _react2.default.createElement(
+                    'option',
+                    { value: '5' },
+                    '5'
+                  ),
+                  _react2.default.createElement(
+                    'option',
+                    { value: '6' },
                     '6'
+                  ),
+                  _react2.default.createElement(
+                    'option',
+                    { value: '7' },
+                    '7'
+                  ),
+                  _react2.default.createElement(
+                    'option',
+                    { value: '8' },
+                    '8'
+                  ),
+                  _react2.default.createElement(
+                    'option',
+                    { value: '9' },
+                    '9'
+                  ),
+                  _react2.default.createElement(
+                    'option',
+                    { value: '10' },
+                    '10'
+                  ),
+                  _react2.default.createElement(
+                    'option',
+                    { value: '11' },
+                    '11'
                   )
                 )
               ),
               _react2.default.createElement(
                 'div',
-                { className: 'add-btn btn btn-primary mb-3' },
+                { className: 'add-btn btn btn-primary mb-3', onClick: this.clickedSaveItemBtn },
                 'Save Item'
               ),
               _react2.default.createElement(
                 'div',
-                { className: 'add-btn btn btn-primary mb-3', onClick: this.clickedCancelBtn },
+                { className: 'add-btn btn btn-danger mb-3', onClick: this.clickedCancelBtn },
                 'Cancel'
               )
             )
@@ -217,6 +282,18 @@ var Layout = function (_Component) {
 
     var _this = _possibleConstructorReturn(this, (Layout.__proto__ || Object.getPrototypeOf(Layout)).call(this));
 
+    _this.addItemToList = function (item) {
+      var allItems = _this.state.allItems;
+      var oldState = _this.state;
+      var newState = (0, _reactAddonsUpdate2.default)(oldState, {
+        allItems: { $push: [item] }
+      });
+      _this.setState(newState, function () {
+        console.log('New State');
+        console.log(_this.state);
+      });
+    };
+
     _this.change = function (event) {
       var name = event.target.name;
       var value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
@@ -255,6 +332,62 @@ var Layout = function (_Component) {
       console.log(allCountries);
     };
 
+    _this.showAllItems = function () {
+      var randomKey = function randomKey() {
+        var randomNumber = '_' + Math.random().toString(36).substr(2, 9);
+        randomNumber += 3;
+        return randomNumber;
+      };
+      return _this.state.allItems.map(function (item, index) {
+        return _react2.default.createElement(
+          'div',
+          { key: randomKey(), className: 'col-md-3' },
+          _react2.default.createElement(
+            'div',
+            { className: 'item-box' },
+            _react2.default.createElement(
+              'div',
+              { className: 'item-img', style: { background: 'url("' + item.productInfo.img_url + '")' } },
+              _react2.default.createElement(
+                'div',
+                { className: 'item-delete', onClick: _this.removeItem.bind(null, index) },
+                _react2.default.createElement('i', { className: 'ti-close' })
+              )
+            ),
+            _react2.default.createElement(
+              'div',
+              { className: 'title' },
+              item.productInfo.title
+            ),
+            _react2.default.createElement(
+              'div',
+              { className: 'quantity' },
+              _react2.default.createElement(
+                'label',
+                { className: 'col-form-label' },
+                'Quantity'
+              ),
+              _react2.default.createElement(
+                'h4',
+                null,
+                item.qtyBuying
+              )
+            )
+          )
+        );
+      });
+    };
+
+    _this.removeItem = function (index) {
+      var allItems = _this.state.allItems;
+      var oldState = _this.state;
+      var newState = (0, _reactAddonsUpdate2.default)(oldState, {
+        allItems: { $splice: [[index, 1]]
+        }
+      });
+      _this.setState(newState);
+    };
+
     _this.addNewBtn = function () {
       _this.setState({
         showPopup: !_this.state.showPopup
@@ -274,8 +407,10 @@ var Layout = function (_Component) {
         payment_type: 'paypal'
       },
       allProducts: '',
+      allItems: [],
       showPopup: false
     };
+    _this.submitForm = _this.submitForm.bind(_this);
     return _this;
   }
 
@@ -316,6 +451,7 @@ var Layout = function (_Component) {
                 _context.t0 = _context['catch'](0);
 
                 console.log(_context.t0);
+
               case 11:
               case 'end':
                 return _context.stop();
@@ -329,6 +465,55 @@ var Layout = function (_Component) {
       }
 
       return getAllProducts;
+    }()
+  }, {
+    key: 'submitForm',
+    value: function () {
+      var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+        var csrf, submit;
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                console.log('clicked Submit');
+                _context2.prev = 1;
+                csrf = document.getElementsByName("_csrf")[0].value;
+                _context2.next = 5;
+                return _axios2.default.post('/api/admin/products', {
+                  _csrf: csrf,
+                  form: this.state.form,
+                  allItems: this.state.allItems
+                });
+
+              case 5:
+                submit = _context2.sent;
+
+                console.log(submit);
+
+                _context2.next = 14;
+                break;
+
+              case 9:
+                _context2.prev = 9;
+                _context2.t0 = _context2['catch'](1);
+
+                console.log('=======================ERROR SUBMITTING FORM=====================');
+                console.log(_context2.t0);
+                console.log('=======================ERROR ERROR=====================');
+
+              case 14:
+              case 'end':
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this, [[1, 9]]);
+      }));
+
+      function submitForm() {
+        return _ref2.apply(this, arguments);
+      }
+
+      return submitForm;
     }()
   }, {
     key: 'render',
@@ -471,42 +656,7 @@ var Layout = function (_Component) {
               'Orders Items'
             )
           ),
-          _react2.default.createElement(
-            'div',
-            { className: 'col-md-3' },
-            _react2.default.createElement(
-              'div',
-              { className: 'item-box' },
-              _react2.default.createElement(
-                'div',
-                { className: 'item-img', style: { background: "url('https://static.nike.com/a/images/t_PDP_1280_v1/f_auto/fcal80yrwi6ylxxg1tz0/epic-react-flyknit-2-womens-running-shoe-5ZJ3Wx.jpg')" } },
-                _react2.default.createElement(
-                  'div',
-                  { className: 'item-delete' },
-                  _react2.default.createElement('i', { className: 'ti-close' })
-                )
-              ),
-              _react2.default.createElement(
-                'div',
-                { className: 'title' },
-                'Sneaker Title'
-              ),
-              _react2.default.createElement(
-                'div',
-                { className: 'quantity' },
-                _react2.default.createElement(
-                  'label',
-                  { className: 'col-form-label' },
-                  'Quantity'
-                ),
-                _react2.default.createElement(
-                  'h4',
-                  null,
-                  '4'
-                )
-              )
-            )
-          ),
+          this.showAllItems(),
           _react2.default.createElement(
             'div',
             { className: 'col-md-3' },
@@ -525,14 +675,14 @@ var Layout = function (_Component) {
               )
             )
           ),
-          _react2.default.createElement(_Popup2.default, { showPopup: this.state.showPopup, closePopup: this.addNewBtn, allProducts: this.state.allProducts })
+          _react2.default.createElement(_Popup2.default, { showPopup: this.state.showPopup, closePopup: this.addNewBtn, allProducts: this.state.allProducts, addItemToList: this.addItemToList })
         ),
         _react2.default.createElement(
           'div',
           { className: 'form-group' },
           _react2.default.createElement(
-            'button',
-            { type: 'submit', className: 'btn btn-primary mb-3' },
+            'div',
+            { className: 'btn btn-primary mb-3', onClick: this.submitForm },
             'Submit'
           )
         )

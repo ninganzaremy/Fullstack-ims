@@ -23,31 +23,39 @@ class Layout extends Component {
        payment_type:'paypal'
      },
      allProducts: '',
+     allItems:[],
      showPopup: false
     }
+    this.submitForm = this.submitForm.bind(this)
   }
   componentWillMount(){
     this.getAllProducts()
   }
    async getAllProducts(){
-     try{
-       let allProducts = await axios.get('/api/admin/products')
-       allProducts= allProducts.data
-       this.setState({
-         allProducts
-       }, ()=> console.log(this.state))
-  } catch(error){
-  console.log(error)}
-  // .then(function (response) {
-  //   // handle success
-  //   console.log(response);
-  // })
-  // .catch(function (error) {
-  //   // handle error
-  //   console.log(error);
-  // })
-
+       try{
+         let allProducts = await axios.get('/api/admin/products')
+         allProducts= allProducts.data
+         this.setState({
+           allProducts
+         }, ()=> console.log(this.state))
+    } catch(error){
+    console.log(error)
   }
+}
+
+
+    addItemToList=(item) => {
+      let allItems = this.state.allItems
+      let oldState =this.state
+      let newState =update(oldState,{
+        allItems:{$push:[item]}
+      })
+      this.setState(newState,()=>{
+        console.log('New State')
+        console.log(this.state)
+      })
+    }
+
   change=(event) =>{
     var name =event.target.name
     var value =(event.target.type ==='checkbox') ? event.target.checked : event.target.value
@@ -78,11 +86,71 @@ class Layout extends Component {
     )
      console.log(allCountries);
   }
+
+  showAllItems = () =>{
+    let randomKey = function () {
+      let randomNumber = '_' + Math.random().toString(36).substr(2,9)
+      randomNumber +=3
+      return randomNumber;
+    }
+    return this.state.allItems.map((item, index) =>(
+      <div key={randomKey()} className="col-md-3">
+        <div className="item-box">
+
+          <div className="item-img" style={{background:`url("${item.productInfo.img_url}")`}}>
+            <div className="item-delete" onClick={this.removeItem.bind(null, index)}>
+              <i className="ti-close"></i>
+            </div>
+          </div>
+          <div className="title">
+            {item.productInfo.title}
+          </div>
+          <div className="quantity">
+              <label className="col-form-label">Quantity</label>
+              <h4>{item.qtyBuying}</h4>
+          </div>
+        </div>
+      </div>
+    ))
+  }
+
+  removeItem =(index) =>{
+    let allItems = this.state.allItems
+    let oldState =this.state
+    let newState =update(oldState,{
+      allItems:{$splice:[[index, 1]]
+      }
+    })
+    this.setState(newState)
+  }
+
+
+
   addNewBtn = () => {
     this.setState({
       showPopup: !this.state.showPopup
     })
   }
+
+  async submitForm(){
+    console.log('clicked Submit')
+    try{
+      const csrf =document.getElementsByName("_csrf")[0].value
+      var submit = await axios.post('/api/admin/products',{
+        _csrf:csrf,
+        form: this.state.form,
+        allItems:this.state.allItems
+      })
+      console.log(submit)
+
+    } catch(error) {
+        console.log('=======================ERROR SUBMITTING FORM=====================')
+        console.log(error)
+        console.log('=======================ERROR ERROR=====================')
+      }
+  }
+
+
   render () {
     return (
       <form action="/admin/products" method="post">
@@ -151,25 +219,7 @@ class Layout extends Component {
               <h2>Orders Items</h2>
 
             </div>
-            <div className="col-md-3">
-              <div className="item-box">
-
-                <div className="item-img" style={{background:"url('https://static.nike.com/a/images/t_PDP_1280_v1/f_auto/fcal80yrwi6ylxxg1tz0/epic-react-flyknit-2-womens-running-shoe-5ZJ3Wx.jpg')"}}>
-                  <div className="item-delete">
-                    <i className="ti-close"></i>
-                  </div>
-                </div>
-                <div className="title">
-                  Sneaker Title
-                </div>
-                <div className="quantity">
-                    <label className="col-form-label">Quantity</label>
-                    <h4>4</h4>
-
-                </div>
-              </div>
-
-            </div>
+          {this.showAllItems()}
             <div className="col-md-3">
               <div className="item-box">
                 <div className="add-item-button" onClick ={this.addNewBtn}>
@@ -178,10 +228,10 @@ class Layout extends Component {
                 </div>
               </div>
             </div>
-            <Popup  showPopup={this.state.showPopup} closePopup= {this.addNewBtn} allProducts={this.state.allProducts}/>
+            <Popup  showPopup={this.state.showPopup} closePopup= {this.addNewBtn} allProducts={this.state.allProducts} addItemToList={this.addItemToList}/>
           </div>
           <div className="form-group">
-            <button type="submit" className="btn btn-primary mb-3">Submit</button>
+            <div  className="btn btn-primary mb-3" onClick={this.submitForm}>Submit</div>
           </div>
     </form>)
   }
