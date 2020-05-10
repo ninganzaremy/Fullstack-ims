@@ -7,7 +7,7 @@ class ProductController {
     try {
       let allProducts= await Database.raw(`
         SELECT products.id,
-products.title, products.sku,brands.title as brand,
+products.title, products.sku,products.price,brands.title as brand,
 concat(users.f_name, ' ' ,users.l_name) as user,
  products.material,products.qty, products.size, products.user_id,products.created_at
 FROM products
@@ -31,7 +31,7 @@ ORDER BY created_at ASC
      try {
        const post= request.post()
        await Database.raw(`
-         INSERT INTO products(title,sku,img_url,material,description,brand_id,qty, size, user_id)
+         INSERT INTO products(title,sku,img_url,material,description,brand_id,qty,price,size, user_id)
          values(
            ${sanitize.escape(post.title)},
            ${sanitize.escape(post.sku)},
@@ -40,6 +40,7 @@ ORDER BY created_at ASC
            ${sanitize.escape(post.description)},
            ${sanitize.escape(post.brand_id)},
            ${sanitize.escape(post.qty)},
+           ${sanitize.escape(post.price)},
            ${sanitize.escape(post.size)},
            ${parseInt(1)})
          `)
@@ -65,7 +66,7 @@ async create({view,request, response}){
         SELECT products.id,
 products.title, products.sku,products.img_url,products.description,brands.title as brand,
 concat(users.f_name, ' ' ,users.l_name) as user,
- products.material,products.qty, products.size, products.user_id,products.created_at
+ products.material,products.qty,products.price, products.size, products.user_id,products.created_at
 FROM products
 INNER JOIN  brands
 ON products.brand_id = brands.id
@@ -91,7 +92,7 @@ LIMIT 1
       let product= await Database.raw(`
         SELECT products.id,products.title, products.sku,products.img_url,products.description,brands.title as brand,
 concat(users.f_name, ' ' ,users.l_name) as user,
- products.material,products.qty, products.size, products.user_id,products.brand_id,products.created_at
+ products.material,products.qty,products.price, products.size, products.user_id,products.brand_id,products.created_at
 FROM products
 INNER JOIN  brands
 ON products.brand_id = brands.id
@@ -130,6 +131,7 @@ LIMIT 1
         description =${sanitize.escape(post.description)},
         brand_id = ${sanitize.escape(post.brand_id)},
         qty = ${sanitize.escape(post.qty)},
+        price = ${sanitize.escape(post.price)},
         size =${sanitize.escape(post.size)},
         user_id = ${parseInt(1)}
         WHERE id =${id}
@@ -159,6 +161,33 @@ LIMIT 1
     }
 
   }
+
+
+    async sendAllProducts({view,request,response}){
+      try {
+            let allProducts= await Database.raw(`
+              SELECT products.id,
+              products.title, products.sku, products.price, products.description,products.img_url, brands.title as brand,
+              concat(users.f_name, ' ' ,users.l_name) as user,
+               products.material,products.qty, products.size, products.brand_id, products.user_id,products.created_at
+              FROM products
+              INNER JOIN  brands
+              ON products.brand_id = brands.id
+              INNER JOIN  users
+              ON products.user_id = users.id
+              ORDER BY created_at ASC
+              `)
+
+          allProducts = allProducts[0]
+
+          return allProducts
+      } catch (error) {
+        console.log(error)
+         return response.redirect('back')
+      }
+
+    }
+
 }
 
 module.exports = ProductController

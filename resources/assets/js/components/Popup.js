@@ -11,6 +11,7 @@ export default class Popup extends Component {
     this.state = {
      form: {
        product: '',
+       productQty: 0,
        qty: 1
 
      }
@@ -20,22 +21,57 @@ export default class Popup extends Component {
     var name =event.target.name
     var value =(event.target.type ==='checkbox') ? event.target.checked : event.target.value
     let currentState = this.state
-    let newState =update(currentState,{
+    let newState = ''
+    if (name =='product' && value != 'none'){
+      let productQty = this.props.allProducts.filter(
+        (item) => item.id == value)
+        productQty = productQty[0].qty
+        console.log(productQty)
+        newState =update(currentState,{
       form: {
         $merge:{
-          [name]: value
+          [name]: value,
+          productQty:productQty
         }
       }
-    })
-    this.setState(newState, () =>{
-      console.log(this.state)
-    })
+    }, () => console.log(this.state))
+  } else{
+      newState = update(currentState, {
+        form: {
+          $merge: {
+            [name]: value
+          }
+        }
+      })
+    }
+    this.setState(newState,() => console.log(this.state))
   }
   showProducts = () => {
     if( this.props.allProducts != ''){
       return this.props.allProducts.map((item) =>(
         <option key={item.id} value={item.id}>{item.title}</option>))
     }
+  }
+  showQty = () =>{
+    let options =[]
+    let number = 0
+    if (this.state.form.productQty>=111){
+      number =111
+    }
+    else{
+      number =this.state.form.productQty+1
+    }
+    if (this.state.form.productQty != 0 || this.state.form.productQty != 'none' ) {
+      for (var i =1; i< number; i++){
+        options.push(i)
+      }
+      return options.map((i) => (
+        <option key={i} value={`${i}`}>{i}</option>)
+      )
+    } else{
+      return(<option key={`no value`} value={`none`}>Please chose a product thats available</option>)
+    }
+
   }
   clickedSaveItemBtn = () =>{
     let product = this.props.allProducts.filter((product) => product.id ==this.state.form.product)
@@ -70,41 +106,7 @@ export default class Popup extends Component {
               </div>
               <div className="form-group">
                 <label htmlFor="">Quantity</label>
-                <select className="custom-select" name="qty" value={this.state.form.qty} onChange={this.change}>
-                  <option value="1">
-                    1
-                  </option>
-                  <option value="2">
-                    2
-                  </option>
-                  <option value="3">
-                    3
-                  </option>
-                  <option value="4">
-                    4
-                  </option>
-                  <option value="5">
-                    5
-                  </option>
-                  <option value="6">
-                    6
-                  </option>
-                  <option value="7">
-                    7
-                  </option>
-                  <option value="8">
-                    8
-                  </option>
-                  <option value="9">
-                    9
-                  </option>
-                  <option value="10">
-                    10
-                  </option>
-                  <option value="11">
-                    11
-                  </option>
-                </select>
+                <select className="custom-select" name="qty" value={this.state.form.qty} onChange={this.change}>{this.showQty()}</select>
               </div>
               <div className="add-btn btn btn-primary mb-3" onClick={this.clickedSaveItemBtn}>
                 Save Item

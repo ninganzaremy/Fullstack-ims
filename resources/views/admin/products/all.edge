@@ -29,6 +29,7 @@
                 <th scope="col">Quantity</th>
                 <th scope="col">Size</th>
                 <th scope="col">Brand</th>
+                <th scope="col">Price</th>
                 <th scope="col">Created_By</th>
                 <th scope="col">Status</th>
                 <th scope="col">Options</th>
@@ -52,9 +53,16 @@
                    {{product.brand}}
                 </td>
                 <td>
+                   {{product.price}}
+                </td>
+                <td>
                    {{product.user}}
                 </td>
-                <td><span class="status-p bg-primary">pending</span></td>
+                <td>
+                  <span class="status-p
+                  {{(product.qty ==0)? 'bg-danger': 'bg-primary'}} bg-primary">
+                    {{(product.qty ==0) ? 'Sold OUt': 'Available'}}</span>
+                </td>
                 <td>
                   <ul class="d-flex justify-content-center">
                     <li class="mr-3">

@@ -49,13 +49,31 @@ var Popup = function (_Component) {
       var name = event.target.name;
       var value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
       var currentState = _this.state;
-      var newState = (0, _reactAddonsUpdate2.default)(currentState, {
-        form: {
-          $merge: _defineProperty({}, name, value)
-        }
-      });
+      var newState = '';
+      if (name == 'product' && value != 'none') {
+        var _$merge;
+
+        var productQty = _this.props.allProducts.filter(function (item) {
+          return item.id == value;
+        });
+        productQty = productQty[0].qty;
+        console.log(productQty);
+        newState = (0, _reactAddonsUpdate2.default)(currentState, {
+          form: {
+            $merge: (_$merge = {}, _defineProperty(_$merge, name, value), _defineProperty(_$merge, 'productQty', productQty), _$merge)
+          }
+        }, function () {
+          return console.log(_this.state);
+        });
+      } else {
+        newState = (0, _reactAddonsUpdate2.default)(currentState, {
+          form: {
+            $merge: _defineProperty({}, name, value)
+          }
+        });
+      }
       _this.setState(newState, function () {
-        console.log(_this.state);
+        return console.log(_this.state);
       });
     };
 
@@ -68,6 +86,34 @@ var Popup = function (_Component) {
             item.title
           );
         });
+      }
+    };
+
+    _this.showQty = function () {
+      var options = [];
+      var number = 0;
+      if (_this.state.form.productQty >= 111) {
+        number = 111;
+      } else {
+        number = _this.state.form.productQty + 1;
+      }
+      if (_this.state.form.productQty != 0 || _this.state.form.productQty != 'none') {
+        for (var i = 1; i < number; i++) {
+          options.push(i);
+        }
+        return options.map(function (i) {
+          return _react2.default.createElement(
+            'option',
+            { key: i, value: '' + i },
+            i
+          );
+        });
+      } else {
+        return _react2.default.createElement(
+          'option',
+          { key: 'no value', value: 'none' },
+          'Please chose a product thats available'
+        );
       }
     };
 
@@ -93,6 +139,7 @@ var Popup = function (_Component) {
     _this.state = {
       form: {
         product: '',
+        productQty: 0,
         qty: 1
 
       }
@@ -150,61 +197,7 @@ var Popup = function (_Component) {
                 _react2.default.createElement(
                   'select',
                   { className: 'custom-select', name: 'qty', value: this.state.form.qty, onChange: this.change },
-                  _react2.default.createElement(
-                    'option',
-                    { value: '1' },
-                    '1'
-                  ),
-                  _react2.default.createElement(
-                    'option',
-                    { value: '2' },
-                    '2'
-                  ),
-                  _react2.default.createElement(
-                    'option',
-                    { value: '3' },
-                    '3'
-                  ),
-                  _react2.default.createElement(
-                    'option',
-                    { value: '4' },
-                    '4'
-                  ),
-                  _react2.default.createElement(
-                    'option',
-                    { value: '5' },
-                    '5'
-                  ),
-                  _react2.default.createElement(
-                    'option',
-                    { value: '6' },
-                    '6'
-                  ),
-                  _react2.default.createElement(
-                    'option',
-                    { value: '7' },
-                    '7'
-                  ),
-                  _react2.default.createElement(
-                    'option',
-                    { value: '8' },
-                    '8'
-                  ),
-                  _react2.default.createElement(
-                    'option',
-                    { value: '9' },
-                    '9'
-                  ),
-                  _react2.default.createElement(
-                    'option',
-                    { value: '10' },
-                    '10'
-                  ),
-                  _react2.default.createElement(
-                    'option',
-                    { value: '11' },
-                    '11'
-                  )
+                  this.showQty()
                 )
               ),
               _react2.default.createElement(
@@ -470,43 +463,49 @@ var Layout = function (_Component) {
     key: 'submitForm',
     value: function () {
       var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
-        var csrf, submit;
+        var self, csrf, submit;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 console.log('clicked Submit');
-                _context2.prev = 1;
+                self = window;
+                _context2.prev = 2;
                 csrf = document.getElementsByName("_csrf")[0].value;
-                _context2.next = 5;
+                _context2.next = 6;
                 return _axios2.default.post('/api/admin/products', {
                   _csrf: csrf,
                   form: this.state.form,
                   allItems: this.state.allItems
                 });
 
-              case 5:
+              case 6:
                 submit = _context2.sent;
 
-                console.log(submit);
+                if (submit.data.status == 'succes') {
+                  self.location.href = "/admin/orders";
+                } else {
+                  alert('\n          Status:' + submit.data.status + ') \n\n          Message:' + submit.data.message + ') \n\n          Error:' + submit.data.error + ') \n\n          ');
+                }
+                console.log(submit.data.status); // NOTE:
 
-                _context2.next = 14;
+                _context2.next = 16;
                 break;
 
-              case 9:
-                _context2.prev = 9;
-                _context2.t0 = _context2['catch'](1);
+              case 11:
+                _context2.prev = 11;
+                _context2.t0 = _context2['catch'](2);
 
                 console.log('=======================ERROR SUBMITTING FORM=====================');
                 console.log(_context2.t0);
                 console.log('=======================ERROR ERROR=====================');
 
-              case 14:
+              case 16:
               case 'end':
                 return _context2.stop();
             }
           }
-        }, _callee2, this, [[1, 9]]);
+        }, _callee2, this, [[2, 11]]);
       }));
 
       function submitForm() {

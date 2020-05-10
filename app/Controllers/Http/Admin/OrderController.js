@@ -4,50 +4,105 @@ const sanitize = use('sqlstring')
 class OrderController {
   async index({view,request,response}){
     try {
-//       let allProducts= await Database.raw(`
-//         SELECT orders.id,
-// orders.title, orders.sku,brands.title as brand,
-// concat(users.f_name, ' ' ,users.l_name) as user,
-//  orders.material,orders.qty, orders.size, orders.user_id,orders.created_at
-// FROM orders
-// INNER JOIN  brands
-// ON orders.brand_id = brands.id
-// INNER JOIN  users
-// ON orders.user_id = users.id
-// ORDER BY created_at ASC
-//         `)
+      let allOrders= await Database.raw(`
+              SELECT orders.id , concat(orders.f_name, ' ', orders.l_name )as customer,
+       SUM(items.qty) as total_items, SUM(items.price * items.qty) as total_price, concat(orders.state, ' ' ,orders.country) as location,
+       orders.payment_type, concat(users.f_name,  ' ' , users.l_name) as user
+       FROM orders
+       INNER JOIN items
+       ON orders.id = items.order_id
+       INNER JOIN users
+       ON orders.user_id = users.id
+       GROUP BY orders.id;`)
 
-        let allProducts = ''
-
-        return view.render('admin/orders/all',{allProducts})
+       allOrders=allOrders[0]
+        return view.render('admin/orders/all',{allOrders})
     } catch (error) {
       console.log(error)
        return response.redirect('back')
     }
 
   }
-   async store({request, response}){
-     try {
-       const post= request.post()
-       await Database.raw(`
-         INSERT INTO orders(title,sku,img_url,material,description,brand_id,qty, size, user_id)
-         values(
-           ${sanitize.escape(post.title)},
-           ${sanitize.escape(post.sku)},
-           ${sanitize.escape(post.img_url)},
-           ${sanitize.escape(post.material)},
-           ${sanitize.escape(post.description)},
-           ${sanitize.escape(post.brand_id)},
-           ${sanitize.escape(post.qty)},
-           ${sanitize.escape(post.size)},
-           ${parseInt(1)})
-         `)
-         return response.redirect('/admin/orders')
-     } catch (error) {
-       console.log(error)
-        return response.redirect('back')
-     }
-  }
+  async store({request, response}){
+    try {
+      const post= request.post()
+      const order = await Database.raw(`
+        INSERT INTO orders(f_name, l_name,address,address_2,city,state,country,zipcode,payment_type,user_id)
+        values(
+          ${sanitize.escape(post.form.f_name)},
+          ${sanitize.escape(post.form.l_name)},
+          ${sanitize.escape(post.form.address)},
+          ${sanitize.escape(post.form.address_2)},
+          ${sanitize.escape(post.form.city)},
+          ${sanitize.escape(post.form.state)},
+          ${sanitize.escape(post.form.country)},
+          ${sanitize.escape(post.form.zipcode)},
+          ${sanitize.escape(post.form.payment_type)},
+          ${parseInt(1)});
+
+        `).then((order)=>{
+          const order_id = order[0].insertId
+          post.allItems.map((item) =>{
+            const insertItem = Database.raw(`
+              INSERT INTO items(title, sku,price, material, description, brand_id, qty, size,order_id, user_id)
+              values(
+                ${sanitize.escape(item.productInfo.title)},
+                ${sanitize.escape(item.productInfo.sku)},
+                ${sanitize.escape(item.productInfo.price)},
+                ${sanitize.escape(item.productInfo.material)},
+                ${sanitize.escape(item.productInfo.description)},
+                ${sanitize.escape(item.productInfo.brand_id)},
+                ${sanitize.escape(item.qtyBuying)},
+                ${sanitize.escape(item.productInfo.size)},
+                ${sanitize.escape(order_id)},
+                ${parseInt(1)});
+              `).then(() =>{
+                  console.log ('successfully saved item')
+                /*=============================================================*/
+                const updateProduct = Database.raw(`
+                    Update products
+                    SET qty = qty - ${item.qtyBuying}
+                    WHERE id = ${item.productInfo.id}
+                  `).then(() =>{
+                      console.log ('successfully Updated Product')
+                  }).catch((error) =>{
+                    console.log(error)
+                    return {
+                      status: 'error',
+                      message:"Cant't Update product",
+                      error: error.sqlMessage
+                    }
+                  })
+
+                /*=============================================================*/
+
+
+              }).catch((error) =>{
+                console.log(error)
+                return {
+                  status: 'error',
+                  message:"Cant't save Item",
+                  error: error.sqlMessage
+                }
+
+              })
+          })
+        })
+
+
+        return{
+          status: 'succes',
+          message:"Saved order",
+        }
+    } catch (error) {
+      console.log(error)
+       return {
+         status: 'error',
+         message:"Cant't save order",
+         error: error.sqlMessage
+       }
+    }
+ }
 async create({view,request, response}){
     // let brands= await Database.raw(`
     //   SELECT * FROM brands
@@ -61,24 +116,39 @@ async create({view,request, response}){
 
     try {
       let order= await Database.raw(`
-        SELECT orders.id,
-orders.title, orders.sku,orders.img_url,orders.description,brands.title as brand,
-concat(users.f_name, ' ' ,users.l_name) as user,
- orders.material,orders.qty, orders.size, orders.user_id,orders.created_at
-FROM orders
-INNER JOIN  brands
-ON orders.brand_id = brands.id
-INNER JOIN  users
-ON orders.user_id = users.id
-WHERE orders.id = ${params.id}
-ORDER BY created_at ASC
-LIMIT 1
+       SELECT orders.*, concat(users.f_name, ' ', users.l_name)as user FROM orders
+       INNER JOIN users
+       ON orders.user_id =users.id
+       WHERE orders.id =${params.id}
         `)
         order = order[0][0]
 
+        let items= await Database.raw(`
+         SELECT *, products.img_url FROM items
+         INNER JOIN products
+         ON items.title =products.title
+         WHERE order_id =${params.id}
+          `)
+          items=items[0]
 
+          let total_price= await Database.raw(`
+                    SELECT orders.id,
+            SUM(items.qty)as total_items,
+            SUM(items.qty*items.price) as total_price
+            FROM orders
+            INNER JOIN items
+            ON orders.id = items.order_id
+            WHERE orders.id =${params.id}
+            GROUP BY orders.id;
+            `)
+            total_price = total_price[0][0].total_price
 
-        return view.render('admin/orders/show',{order})
+        let orderInfo = {
+          order,
+          items,
+          total_price
+        }
+        return view.render('admin/orders/show',{orderInfo})
     } catch (error) {
       console.log(error)
        return response.redirect('back')
@@ -144,11 +214,16 @@ LIMIT 1
   }
    async delete({request, response, params}){
     try {
-      const id = params.id
+      const order_id = params.id
       await Database.raw(`
-        DELETE FROM orders
-        WHERE id = ${id}
+        DELETE FROM items
+        WHERE items.order_id = ${order_id}
         `)
+        await Database.raw(`
+          DELETE FROM orders
+          WHERE orders.id = ${order_id}
+          `)
+
         return response.redirect(`/admin/orders`)
     } catch (error) {
       console.log(error)

@@ -16,11 +16,12 @@
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
 const Route = use('Route')
 
-Route.get('/', 'PageController.index')
+Route.get('/', 'Admin/DashboardController.index')
+Route.get('/admin', 'Admin/DashboardController.index')
 
 //API
-Route.get('api/admin/products', 'Api/ProductController.index')
-Route.post('api/admin/products', 'Api/ProductController.store')
+Route.get('api/admin/products', 'Admin/ProductController.sendAllProducts')
+Route.post('api/admin/products', 'Admin/OrderController.store')
 
 
 //ADMIN products
