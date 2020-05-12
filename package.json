@@ -69,5 +69,8 @@
   },
   "autoload": {
     "App": "./app"
-  }
+  },
+  "engines": {
+    "node": "11.15.0"
+}
 }
