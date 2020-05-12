@@ -1,1 +1,2 @@
-web: vendor/bin/heroku-php-apache2 public/
+release: ENV_SILENT=true node ace migration:run --force
+web: ENV_SILENT=true npm start
